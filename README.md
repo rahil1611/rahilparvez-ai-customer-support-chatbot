@@ -72,16 +72,15 @@ ai-chatbot/
 │   ├── customer_support.csv      # Raw Bitext dataset (gitignored, regenerate via download_datasets.py)
 │   ├── sentiment_data.csv        # Raw Rotten Tomatoes dataset (gitignored)
 │   ├── processed/                # Cleaned train/test splits produced by preprocess.py (gitignored)
-│   └── finetune/                 # DistilBERT fine-tuning data + script
+│   └── finetune/                 # DistilBERT fine-tuning script (finetune_*.csv data is gitignored)
 ├── models/
 │   ├── tfidf_vectorizer.pkl, logistic_regression_tuned.pkl, decision_tree_tuned.pkl  # tracked (small)
 │   ├── finetuned/                # Fine-tuned DistilBERT weights (gitignored — see Setup)
 │   └── gpt2-finetuned/           # Fine-tuned GPT-2 weights (gitignored — see Setup)
 ├── results/                    # Evaluation plots and metrics CSVs (tracked)
-└── chatbot.db                   # Runtime SQLite database (gitignored)
+├── chatbot.db                   # Runtime SQLite database (gitignored)
+└── requirements.txt              # Pinned dependencies, derived from actual imports
 ```
-
-> No `requirements.txt` exists in the project yet — see Setup below for the packages actually imported by the code.
 
 ## How It Works
 
@@ -96,7 +95,7 @@ ai-chatbot/
 Requires Python 3.11 and (for practical training/inference speed) a CUDA-capable GPU — the code checks `torch.cuda.is_available()` and falls back to CPU automatically.
 
 ```bash
-pip install fastapi uvicorn pydantic sqlalchemy pandas numpy torch transformers scikit-learn matplotlib seaborn nltk datasets huggingface_hub
+pip install -r requirements.txt
 ```
 
 The trained deep-learning models (`models/finetuned/`, `models/gpt2-finetuned/`) are excluded from this repository by `.gitignore` due to size (hundreds of MB to ~1.4GB). To obtain them, either:
@@ -132,7 +131,6 @@ The fine-tuned GPT-2 response generator was evaluated in `ai-chatbot.ipynb` by c
 
 ## Future Improvements
 
-- Add a `requirements.txt` / `pyproject.toml` pinning exact dependency versions
 - Replace the in-memory `conversations` dict in `app.py` with persistent per-session storage so history survives a server restart
 - Add automated tests for the FastAPI routes
 - Move the hardcoded `/stats` accuracy figures to be read from `results/model_comparison.csv` and `results/finetune/finetune_results.csv` directly, so they can't drift from the actual latest metrics
