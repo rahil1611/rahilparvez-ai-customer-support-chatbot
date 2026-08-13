@@ -1,0 +1,2 @@
+model,epochs,best_val_f1,final_acc,final_f1,num_classes,train_size,val_size
+distilbert-base-uncased,3,0.9669188885731443,0.9674418604651163,0.9669188885731443,11,858,215

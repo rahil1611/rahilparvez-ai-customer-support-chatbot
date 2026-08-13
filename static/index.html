@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Support Assistant — Customer Support</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-dark: #5A52D5;
+      --secondary: #FF6584;
+      --success: #43D39E;
+      --warning: #FFBE0B;
+      --danger: #FF4757;
+      --dark: #1A1A2E;
+      --darker: #16213E;
+      --card: #0F3460;
+      --text: #E8E8F0;
+      --text-muted: #9999BB;
+      --border: rgba(108,99,255,0.2);
+      --glass: rgba(15,52,96,0.6);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--darker) 0%, var(--card) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+    .logo { display:flex; align-items:center; gap:12px; }
+    .logo-icon {
+      width:40px; height:40px; border-radius:12px;
+      background: linear-gradient(135deg,var(--primary),var(--secondary));
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; box-shadow:0 4px 15px rgba(108,99,255,0.4);
+    }
+    .logo-text h1 { font-size:18px; font-weight:700; color:var(--text); }
+    .logo-text p  { font-size:11px; color:var(--text-muted); }
+    .header-right { display:flex; align-items:center; gap:16px; }
+    .status-badge {
+      display:flex; align-items:center; gap:6px;
+      background:rgba(67,211,158,0.1); border:1px solid rgba(67,211,158,0.3);
+      padding:6px 12px; border-radius:20px; font-size:12px; color:var(--success);
+    }
+    .status-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--success); animation:pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:0.5;transform:scale(1.3)}
+    }
+    .nav-btn {
+      background:var(--glass); border:1px solid var(--border);
+      color:var(--text-muted); padding:8px 16px; border-radius:8px;
+      cursor:pointer; font-size:13px; transition:all 0.2s;
+    }
+    .nav-btn:hover { color:var(--text); border-color:var(--primary); }
+    .nav-btn.active { color:var(--primary); border-color:var(--primary);
+      background:rgba(108,99,255,0.1); }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      display:flex; flex:1; overflow:hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width:280px; background:var(--darker);
+      border-right:1px solid var(--border);
+      display:flex; flex-direction:column;
+      padding:16px; gap:12px; overflow-y:auto; flex-shrink:0;
+    }
+    .sidebar-section h3 {
+      font-size:11px; font-weight:600; color:var(--text-muted);
+      text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;
+    }
+    .stat-card {
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:12px; padding:14px; display:flex;
+      align-items:center; gap:12px;
+    }
+    .stat-icon {
+      width:36px; height:36px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center; font-size:16px;
+    }
+    .stat-info p { font-size:11px; color:var(--text-muted); }
+    .stat-info h4 { font-size:18px; font-weight:700; color:var(--text); }
+    .model-card {
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:12px; padding:14px;
+    }
+    .model-card h4 { font-size:13px; font-weight:600; margin-bottom:8px; }
+    .model-metric {
+      display:flex; justify-content:space-between;
+      font-size:12px; color:var(--text-muted); margin-bottom:4px;
+    }
+    .model-metric span:last-child { color:var(--success); font-weight:600; }
+    .progress-bar {
+      height:4px; background:rgba(255,255,255,0.1);
+      border-radius:2px; margin-bottom:8px; overflow:hidden;
+    }
+    .progress-fill {
+      height:100%; border-radius:2px;
+      background:linear-gradient(90deg,var(--primary),var(--secondary));
+      transition:width 1s ease;
+    }
+    .quick-btn {
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:8px; padding:10px 12px; cursor:pointer;
+      font-size:12px; color:var(--text-muted); text-align:left;
+      transition:all 0.2s; width:100%;
+    }
+    .quick-btn:hover {
+      color:var(--text); border-color:var(--primary);
+      background:rgba(108,99,255,0.1);
+    }
+    .quick-btn i { margin-right:8px; color:var(--primary); }
+
+    /* ── CHAT AREA ── */
+    .chat-area {
+      flex:1; display:flex; flex-direction:column; overflow:hidden;
+    }
+    .chat-messages {
+      flex:1; overflow-y:auto; padding:24px;
+      display:flex; flex-direction:column; gap:16px;
+    }
+    .chat-messages::-webkit-scrollbar { width:4px; }
+    .chat-messages::-webkit-scrollbar-track { background:transparent; }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background:var(--border); border-radius:2px;
+    }
+
+    /* ── MESSAGES ── */
+    .message { display:flex; gap:12px; max-width:75%; animation:fadeSlide 0.3s ease; }
+    @keyframes fadeSlide {
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .message.user { flex-direction:row-reverse; align-self:flex-end; }
+    .message.bot  { align-self:flex-start; }
+    .avatar {
+      width:36px; height:36px; border-radius:12px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:16px;
+    }
+    .bot .avatar {
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      box-shadow:0 4px 15px rgba(108,99,255,0.3);
+    }
+    .user .avatar {
+      background:linear-gradient(135deg,var(--success),#38B2AC);
+      box-shadow:0 4px 15px rgba(67,211,158,0.3);
+    }
+    .bubble {
+      padding:12px 16px; border-radius:16px;
+      font-size:14px; line-height:1.6; max-width:100%;
+    }
+    .bot .bubble {
+      background:var(--glass); border:1px solid var(--border);
+      border-top-left-radius:4px; color:var(--text);
+    }
+    .user .bubble {
+      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+      border-top-right-radius:4px; color:#fff;
+    }
+    .bubble-meta {
+      display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;
+    }
+    .badge {
+      font-size:10px; padding:2px 8px; border-radius:10px; font-weight:500;
+    }
+    .badge-positive  { background:rgba(67,211,158,0.15); color:var(--success); border:1px solid rgba(67,211,158,0.3); }
+    .badge-negative  { background:rgba(255,71,87,0.15);  color:var(--danger);  border:1px solid rgba(255,71,87,0.3); }
+    .badge-neutral   { background:rgba(153,153,187,0.15);color:var(--text-muted);border:1px solid rgba(153,153,187,0.3); }
+    .badge-intent    { background:rgba(108,99,255,0.15); color:var(--primary); border:1px solid rgba(108,99,255,0.3); }
+    .badge-escalate  { background:rgba(255,190,11,0.15); color:var(--warning); border:1px solid rgba(255,190,11,0.3); }
+    .time-label { font-size:10px; color:var(--text-muted); }
+
+    /* ── TYPING INDICATOR ── */
+    .typing-indicator { display:flex; gap:4px; align-items:center; padding:4px 0; }
+    .typing-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--primary); animation:typing 1.4s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay:0.2s; }
+    .typing-dot:nth-child(3) { animation-delay:0.4s; }
+    @keyframes typing {
+      0%,60%,100%{transform:translateY(0);opacity:0.4}
+      30%{transform:translateY(-8px);opacity:1}
+    }
+
+    /* ── ESCALATION BANNER ── */
+    .escalation-banner {
+      background:linear-gradient(135deg,rgba(255,190,11,0.15),rgba(255,71,87,0.15));
+      border:1px solid rgba(255,190,11,0.4); border-radius:12px;
+      padding:12px 16px; display:flex; align-items:center; gap:10px;
+      font-size:13px; color:var(--warning); animation:fadeSlide 0.3s ease;
+    }
+
+    /* ── INPUT AREA ── */
+    .input-area {
+      padding:16px 24px;
+      background:var(--darker); border-top:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .input-wrapper {
+      display:flex; gap:12px; align-items:flex-end;
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:16px; padding:12px 16px; transition:border-color 0.2s;
+    }
+    .input-wrapper:focus-within { border-color:var(--primary); }
+    #messageInput {
+      flex:1; background:transparent; border:none; outline:none;
+      color:var(--text); font-size:14px; font-family:'Inter',sans-serif;
+      resize:none; max-height:120px; line-height:1.5;
+    }
+    #messageInput::placeholder { color:var(--text-muted); }
+    .input-actions { display:flex; gap:8px; align-items:center; }
+    .mic-btn, .speaker-btn {
+      width:40px; height:40px; border-radius:12px; border:none;
+      background:var(--glass); border:1px solid var(--border);
+      color:var(--text-muted); cursor:pointer; font-size:16px;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.2s;
+    }
+    .mic-btn:hover, .speaker-btn:hover { color:var(--text); border-color:var(--primary); }
+    .mic-btn.recording {
+      background:linear-gradient(135deg,var(--secondary),var(--danger));
+      color:#fff; animation:pulse 1s infinite;
+    }
+    .speaker-btn.active { color:var(--success); border-color:var(--success); background:rgba(67,211,158,0.1); }
+    .send-btn {
+      width:40px; height:40px; border-radius:12px; border:none;
+      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color:#fff; cursor:pointer; font-size:16px;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.2s; box-shadow:0 4px 15px rgba(108,99,255,0.4);
+    }
+    .send-btn:hover { transform:scale(1.05); box-shadow:0 6px 20px rgba(108,99,255,0.5); }
+    .send-btn:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+    .char-count { font-size:11px; color:var(--text-muted); }
+
+    /* ── ANALYTICS PANEL ── */
+    .analytics-panel {
+      width:300px; background:var(--darker);
+      border-left:1px solid var(--border);
+      padding:16px; overflow-y:auto; flex-shrink:0;
+      display:none;
+    }
+    .analytics-panel.visible { display:block; }
+    .analytics-panel h3 {
+      font-size:14px; font-weight:600; margin-bottom:16px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .chart-box {
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:12px; padding:14px; margin-bottom:12px;
+    }
+    .chart-box h4 { font-size:12px; color:var(--text-muted); margin-bottom:10px; }
+    .sentiment-bars { display:flex; flex-direction:column; gap:8px; }
+    .sent-row { display:flex; align-items:center; gap:8px; }
+    .sent-label { font-size:12px; width:60px; color:var(--text-muted); }
+    .sent-bar { flex:1; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+    .sent-fill { height:100%; border-radius:4px; transition:width 0.5s ease; }
+    .sent-count { font-size:12px; color:var(--text); width:24px; text-align:right; }
+    .intent-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .intent-item {
+      background:rgba(108,99,255,0.1); border:1px solid rgba(108,99,255,0.2);
+      border-radius:8px; padding:8px; text-align:center;
+    }
+    .intent-item .count { font-size:20px; font-weight:700; color:var(--primary); }
+    .intent-item .label { font-size:10px; color:var(--text-muted); }
+
+    /* ── WELCOME ── */
+    .welcome-msg {
+      text-align:center; padding:40px 20px; color:var(--text-muted);
+    }
+    .welcome-msg .welcome-icon {
+      width:80px; height:80px; border-radius:24px; margin:0 auto 16px;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      display:flex; align-items:center; justify-content:center;
+      font-size:36px; box-shadow:0 8px 30px rgba(108,99,255,0.4);
+    }
+    .welcome-msg h2 { font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
+    .welcome-msg p  { font-size:14px; margin-bottom:24px; }
+    .suggestion-chips { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+    .chip {
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:20px; padding:8px 16px; font-size:13px;
+      color:var(--text-muted); cursor:pointer; transition:all 0.2s;
+    }
+    .chip:hover { color:var(--text); border-color:var(--primary); background:rgba(108,99,255,0.1); }
+
+    /* ── RATING ── */
+    .rating-widget {
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:12px; padding:14px; margin-top:8px; text-align:center;
+    }
+    .rating-widget p { font-size:13px; color:var(--text-muted); margin-bottom:10px; }
+    .stars { display:flex; justify-content:center; gap:8px; }
+    .star { font-size:24px; cursor:pointer; transition:transform 0.2s; }
+    .star:hover { transform:scale(1.2); }
+
+    /* ── SCROLLBAR ── */
+    .sidebar::-webkit-scrollbar,
+    .analytics-panel::-webkit-scrollbar { width:4px; }
+    .sidebar::-webkit-scrollbar-thumb,
+    .analytics-panel::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+    @media(max-width:768px) {
+      .sidebar { display:none; }
+      .analytics-panel { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛍️</div>
+    <div class="logo-text">
+      <h1>Customer Support Chatbot</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="speaker-btn" id="speakerBtn" onclick="toggleTTS()" title="Toggle Text-to-Speech">
+      <i class="fas fa-volume-up"></i>
+    </button>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      AI Online
+    </div>
+    <button class="nav-btn active" onclick="showChat(event)">💬 Chat</button>
+    <button class="nav-btn" onclick="window.open('/static/admin.html', '_blank')">📊 Admin</button>
+    <button class="nav-btn" onclick="toggleAnalytics()" id="analyticsBtn">📈 Analytics</button>
+    <button class="nav-btn" onclick="clearChat()">🗑️ Clear</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <h3>Live Stats</h3>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(108,99,255,0.15)">💬</div>
+        <div class="stat-info">
+          <p>Messages</p>
+          <h4 id="msgCount">0</h4>
+        </div>
+      </div>
+      <div class="stat-card" style="margin-top:8px">
+        <div class="stat-icon" style="background:rgba(67,211,158,0.15)">😊</div>
+        <div class="stat-info">
+          <p>Avg Sentiment</p>
+          <h4 id="avgSentiment">—</h4>
+        </div>
+      </div>
+      <div class="stat-card" style="margin-top:8px">
+        <div class="stat-icon" style="background:rgba(255,100,132,0.15)">🎯</div>
+        <div class="stat-info">
+          <p>Confidence</p>
+          <h4 id="avgConfidence">—</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Models</h3>
+      <div class="model-card">
+        <h4>🤖 Logistic Regression</h4>
+        <div class="model-metric"><span>Accuracy</span><span>75.62%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:75.62%"></div></div>
+        <div class="model-metric"><span>Role</span><span>Sentiment</span></div>
+      </div>
+      <div class="model-card" style="margin-top:8px">
+        <h4>🌳 Decision Tree</h4>
+        <div class="model-metric"><span>Accuracy</span><span id="dtAcc">—</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="dtBar" style="width:0%"></div></div>
+        <div class="model-metric"><span>Role</span><span>Intent</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Quick Questions</h3>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="quick-btn" onclick="sendQuick('Where is my order?')">
+          <i class="fas fa-box"></i>Where is my order?
+        </button>
+        <button class="quick-btn" onclick="sendQuick('I want to return an item')">
+          <i class="fas fa-undo"></i>Return an item
+        </button>
+        <button class="quick-btn" onclick="sendQuick('I need a refund please')">
+          <i class="fas fa-money-bill"></i>Request refund
+        </button>
+        <button class="quick-btn" onclick="sendQuick('What payment methods do you accept?')">
+          <i class="fas fa-credit-card"></i>Payment methods
+        </button>
+        <button class="quick-btn" onclick="sendQuick('Do you have any discounts?')">
+          <i class="fas fa-tag"></i>Discounts & offers
+        </button>
+        <button class="quick-btn" onclick="sendQuick('I cannot login to my account')">
+          <i class="fas fa-user"></i>Account issue
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CHAT -->
+  <div class="chat-area">
+    <div class="chat-messages" id="chatMessages">
+      <div class="welcome-msg" id="welcomeMsg">
+        <div class="welcome-icon">🤖</div>
+        <h2>Hello! I'm Your Support Assistant</h2>
+        <p>I can help you with orders, returns, refunds, shipping and account issues!</p>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="sendQuick('Track my order')">📦 Track order</div>
+          <div class="chip" onclick="sendQuick('I want to return something')">↩️ Return item</div>
+          <div class="chip" onclick="sendQuick('I need a refund')">💰 Get refund</div>
+          <div class="chip" onclick="sendQuick('Show me current deals')">🏷️ View deals</div>
+          <div class="chip" onclick="sendQuick('Help with my account')">👤 My account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea id="messageInput" rows="1"
+          placeholder="Type your message... (Press Enter to send)"
+          onkeydown="handleKey(event)"
+          oninput="updateCharCount(this)"></textarea>
+        <div class="input-actions">
+          <span class="char-count" id="charCount">0</span>
+          <button class="mic-btn" id="micBtn" onclick="startVoiceInput()" title="Voice Input">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS PANEL -->
+  <div class="analytics-panel" id="analyticsPanel">
+    <h3><i class="fas fa-chart-bar" style="color:var(--primary)"></i> Analytics</h3>
+
+    <div class="chart-box">
+      <h4>Sentiment Distribution</h4>
+      <div class="sentiment-bars">
+        <div class="sent-row">
+          <span class="sent-label">Positive</span>
+          <div class="sent-bar"><div class="sent-fill" id="posBar" style="width:0%;background:var(--success)"></div></div>
+          <span class="sent-count" id="posCount">0</span>
+        </div>
+        <div class="sent-row">
+          <span class="sent-label">Neutral</span>
+          <div class="sent-bar"><div class="sent-fill" id="neuBar" style="width:0%;background:var(--text-muted)"></div></div>
+          <span class="sent-count" id="neuCount">0</span>
+        </div>
+        <div class="sent-row">
+          <span class="sent-label">Negative</span>
+          <div class="sent-bar"><div class="sent-fill" id="negBar" style="width:0%;background:var(--danger)"></div></div>
+          <span class="sent-count" id="negCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <h4>Intent Breakdown</h4>
+      <div class="intent-grid" id="intentGrid">
+        <div class="intent-item"><div class="count" id="ic-order">0</div><div class="label">Orders</div></div>
+        <div class="intent-item"><div class="count" id="ic-return">0</div><div class="label">Returns</div></div>
+        <div class="intent-item"><div class="count" id="ic-refund">0</div><div class="label">Refunds</div></div>
+        <div class="intent-item"><div class="count" id="ic-shipping">0</div><div class="label">Shipping</div></div>
+        <div class="intent-item"><div class="count" id="ic-payment">0</div><div class="label">Payment</div></div>
+        <div class="intent-item"><div class="count" id="ic-default">0</div><div class="label">Other</div></div>
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <h4>Session Info</h4>
+      <div class="model-metric"><span>Session ID</span><span id="sessionIdDisplay" style="color:var(--primary);font-size:10px">—</span></div>
+      <div class="model-metric" style="margin-top:6px"><span>Turns</span><span id="turnCount" style="color:var(--success)">0</span></div>
+      <div class="model-metric" style="margin-top:6px"><span>Escalations</span><span id="escalCount" style="color:var(--warning)">0</span></div>
+    </div>
+
+    <div class="rating-widget">
+      <p>Rate this conversation</p>
+      <div class="stars">
+        <span class="star" onclick="rate(1)">⭐</span>
+        <span class="star" onclick="rate(2)">⭐</span>
+        <span class="star" onclick="rate(3)">⭐</span>
+        <span class="star" onclick="rate(4)">⭐</span>
+        <span class="star" onclick="rate(5)">⭐</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SESSION_ID = "session_" + Math.random().toString(36).substr(2,9);
+  const savedStats = localStorage.getItem('chatStats');
+  let stats;
+  try {
+    stats = savedStats ? JSON.parse(savedStats) : null;
+  } catch (e) {
+    stats = null;
+  }
+  if (!stats || typeof stats !== 'object') {
+    stats = {
+      messages: 0,
+      sentiments: {positive: 0, neutral: 0, negative: 0},
+      intents: {},
+      confidence: [],
+      escalations: 0,
+      turns: 0,
+      intentCounts: {order: 0, return: 0, refund: 0, shipping: 0, payment: 0, default: 0}
+    };
+  }
+
+  // Voice features
+  let ttsEnabled = false;
+  let recognition = null;
+  let synth = window.speechSynthesis;
+
+  document.getElementById("sessionIdDisplay").textContent = SESSION_ID;
+
+  // Initialize speaker button
+  document.getElementById("speakerBtn").innerHTML = '<i class="fas fa-volume-mute"></i>';
+
+  function updateCharCount(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+    document.getElementById("charCount").textContent = el.value.length;
+  }
+
+  function handleKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function sendQuick(text) {
+    document.getElementById("messageInput").value = text;
+    sendMessage();
+  }
+
+  function getTime() {
+    return new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  }
+
+  function appendMessage(role, content, meta) {
+    const welcome = document.getElementById("welcomeMsg");
+    if (welcome) welcome.remove();
+
+    const container = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = "message " + role;
+
+    const avatarIcon = role === "bot" ? "🤖" : "👤";
+    let metaHTML = "";
+
+    if (role === "bot" && meta) {
+      const sentClass = "badge-" + (meta.sentiment || "neutral");
+      const sentimentText = meta.sentiment || "neutral";
+      const intentText = meta.intent || "general";
+      const sentimentConfidence = typeof meta.sentiment_confidence === "number"
+        ? ` (${(meta.sentiment_confidence * 100).toFixed(0)}%)`
+        : "";
+      const intentConfidence = typeof meta.intent_confidence === "number"
+        ? ` (${(meta.intent_confidence * 100).toFixed(0)}%)`
+        : "";
+
+      metaHTML = `
+        <div class="bubble-meta">
+          <span class="badge ${sentClass}">${sentimentText}${sentimentConfidence}</span>
+          <span class="badge badge-intent">${intentText}${intentConfidence}</span>
+          ${meta.escalate ? '<span class="badge badge-escalate">⚠️ Escalated</span>' : ""}
+          <span class="time-label">${getTime()}</span>
+        </div>`;
+    } else if (role === "user") {
+      metaHTML = `<div class="bubble-meta"><span class="time-label">${getTime()}</span></div>`;
+    }
+
+    div.innerHTML = `
+      <div class="avatar">${avatarIcon}</div>
+      <div>
+        <div class="bubble">${content}</div>
+        ${metaHTML}
+      </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+
+    // Speak bot response if TTS enabled
+    if (role === "bot") {
+      speakResponse(content);
+    }
+  }
+
+  function showTyping() {
+    const container = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = "message bot"; div.id = "typingIndicator";
+    div.innerHTML = `
+      <div class="avatar">🤖</div>
+      <div class="bubble" style="padding:14px 18px">
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById("typingIndicator");
+    if (t) t.remove();
+  }
+
+  function showEscalationBanner() {
+    const container = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = "escalation-banner";
+    div.innerHTML = `<i class="fas fa-exclamation-triangle"></i>
+      <span>⚠️ This conversation has been escalated to a human agent.</span>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function updateStats(meta) {
+    stats.messages++;
+    if (meta.sentiment) stats.sentiments[meta.sentiment] = (stats.sentiments[meta.sentiment]||0)+1;
+    if (meta.intent) {
+      const intentKey = meta.intent.toLowerCase();
+      stats.intents[intentKey] = (stats.intents[intentKey]||0)+1;
+
+      // Map intent to counter element and update in real time
+      let intentCounter = "default";
+      const intentUpper = meta.intent.toUpperCase();
+      if (intentUpper.includes("ORDER")) intentCounter = "order";
+      else if (intentUpper.includes("RETURN")) intentCounter = "return";
+      else if (intentUpper.includes("REFUND")) intentCounter = "refund";
+      else if (intentUpper.includes("SHIP")) intentCounter = "shipping";
+      else if (intentUpper.includes("PAY")) intentCounter = "payment";
+
+      const counterEl = document.getElementById("ic-" + intentCounter);
+      if (counterEl) {
+        counterEl.textContent = (parseInt(counterEl.textContent) || 0) + 1;
+      }
+    }
+    if (typeof meta.intent_confidence === "number") stats.confidence.push(meta.intent_confidence);
+    if (typeof meta.sentiment_confidence === "number") stats.confidence.push(meta.sentiment_confidence);
+    if (meta.escalate)  stats.escalations++;
+    stats.turns = meta.turn_count || stats.turns;
+
+    document.getElementById("msgCount").textContent = stats.messages;
+    document.getElementById("avgSentiment").textContent =
+      Object.entries(stats.sentiments).sort((a,b)=>b[1]-a[1])[0]?.[0] || "—";
+    document.getElementById("avgConfidence").textContent =
+      stats.confidence.length
+        ? (stats.confidence.reduce((a,b)=>a+b,0)/stats.confidence.length*100).toFixed(1)+"%"
+        : "—";
+
+    const total = Object.values(stats.sentiments).reduce((a,b)=>a+b,0) || 1;
+    ["pos","neu","neg"].forEach((k,i) => {
+      const key = ["positive","neutral","negative"][i];
+      const count = stats.sentiments[key] || 0;
+      document.getElementById(k+"Bar").style.width = (count/total*100)+"%";
+      document.getElementById(k+"Count").textContent = count;
+    });
+
+    document.getElementById("turnCount").textContent = stats.turns;
+    document.getElementById("escalCount").textContent = stats.escalations;
+
+    // Update intentCounts from detected intent
+    if (meta.intent) {
+      let intentKey = "default";
+      const intentUpper = meta.intent.toUpperCase();
+      if (intentUpper.includes("ORDER")) intentKey = "order";
+      else if (intentUpper.includes("RETURN")) intentKey = "return";
+      else if (intentUpper.includes("REFUND")) intentKey = "refund";
+      else if (intentUpper.includes("SHIP")) intentKey = "shipping";
+      else if (intentUpper.includes("PAY")) intentKey = "payment";
+      if (!stats.intentCounts) stats.intentCounts = {order: 0, return: 0, refund: 0, shipping: 0, payment: 0, default: 0};
+      stats.intentCounts[intentKey] = (stats.intentCounts[intentKey] || 0) + 1;
+    }
+
+    localStorage.setItem('chatStats', JSON.stringify(stats));
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const msg   = input.value.trim();
+    if (!msg) return;
+
+    input.value = ""; input.style.height = "auto";
+    document.getElementById("charCount").textContent = "0";
+    document.getElementById("sendBtn").disabled = true;
+
+    appendMessage("user", msg);
+    showTyping();
+
+    try {
+      const res  = await fetch("/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({message:msg, session_id:SESSION_ID, user_name:"Customer"})
+      });
+      const data = await res.json();
+      removeTyping();
+      appendMessage("bot", data.response, data);
+      if (data.escalate) showEscalationBanner();
+      updateStats(data);
+
+      // Direct intent update
+      const intentStr = (data.intent || '').toUpperCase();
+      if (intentStr.includes('ORDER'))    { document.getElementById('ic-order').textContent    = parseInt(document.getElementById('ic-order').textContent    || 0) + 1; }
+      if (intentStr.includes('RETURN'))   { document.getElementById('ic-return').textContent   = parseInt(document.getElementById('ic-return').textContent   || 0) + 1; }
+      if (intentStr.includes('REFUND'))   { document.getElementById('ic-refund').textContent   = parseInt(document.getElementById('ic-refund').textContent   || 0) + 1; }
+      if (intentStr.includes('SHIP'))     { document.getElementById('ic-shipping').textContent = parseInt(document.getElementById('ic-shipping').textContent || 0) + 1; }
+      if (intentStr.includes('PAY'))      { document.getElementById('ic-payment').textContent  = parseInt(document.getElementById('ic-payment').textContent  || 0) + 1; }
+      if (!intentStr.includes('ORDER') && !intentStr.includes('RETURN') && !intentStr.includes('REFUND') && !intentStr.includes('SHIP') && !intentStr.includes('PAY')) { document.getElementById('ic-default').textContent = parseInt(document.getElementById('ic-default').textContent || 0) + 1; }
+
+      // Direct session update
+      document.getElementById('turnCount').textContent = data.turn_count || 0;
+      if (data.escalate) { document.getElementById('escalCount').textContent = parseInt(document.getElementById('escalCount').textContent || 0) + 1; }
+    } catch(err) {
+      removeTyping();
+      appendMessage("bot", "⚠️ Connection error. Please make sure the server is running.", null);
+    }
+
+    document.getElementById("sendBtn").disabled = false;
+    input.focus();
+  }
+
+  function toggleAnalytics() {
+    const panel = document.getElementById("analyticsPanel");
+    const btn   = document.getElementById("analyticsBtn");
+    panel.classList.toggle("visible");
+    btn.classList.toggle("active");
+  }
+
+  function showChat(event) {
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    if (event && event.currentTarget) {
+      event.currentTarget.classList.add("active");
+    }
+  }
+
+  function clearChat() {
+    const container = document.getElementById("chatMessages");
+    container.innerHTML = `
+      <div class="welcome-msg" id="welcomeMsg">
+        <div class="welcome-icon">🤖</div>
+        <h2>Hello! I'm Your Support Assistant</h2>
+        <p>I can help you with orders, returns, refunds, shipping and account issues!</p>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="sendQuick('Track my order')">📦 Track order</div>
+          <div class="chip" onclick="sendQuick('I want to return something')">↩️ Return item</div>
+          <div class="chip" onclick="sendQuick('I need a refund')">💰 Get refund</div>
+          <div class="chip" onclick="sendQuick('Show me current deals')">🏷️ View deals</div>
+        </div>
+      </div>`;
+    stats = {messages:0,sentiments:{positive:0,neutral:0,negative:0},intents:{},confidence:[],escalations:0,turns:0,intentCounts:{order:0,return:0,refund:0,shipping:0,payment:0,default:0}};
+    localStorage.removeItem('chatStats');
+    document.getElementById('msgCount').textContent = '0';
+    document.getElementById('avgSentiment').textContent = '—';
+    document.getElementById('avgConfidence').textContent = '—';
+    document.getElementById('turnCount').textContent = '0';
+    document.getElementById('escalCount').textContent = '0';
+    ['order','return','refund','shipping','payment','default'].forEach(k => {
+      const el = document.getElementById('ic-' + k);
+      if (el) el.textContent = '0';
+    });
+    ['pos','neu','neg'].forEach(k => {
+      const bar = document.getElementById(k + 'Bar');
+      const count = document.getElementById(k + 'Count');
+      if (bar) bar.style.width = '0%';
+      if (count) count.textContent = '0';
+    });
+  }
+
+  async function rate(stars) {
+    await fetch("/feedback", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({session_id:SESSION_ID, rating:stars, comment:""})
+    });
+    document.querySelector(".rating-widget p").textContent = `Thanks for rating ${stars} ⭐`;
+  }
+
+  // Voice Functions
+  function toggleTTS() {
+    ttsEnabled = !ttsEnabled;
+    const btn = document.getElementById("speakerBtn");
+    if (ttsEnabled) {
+      btn.classList.add("active");
+      btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+    } else {
+      btn.classList.remove("active");
+      btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    }
+  }
+
+  function startVoiceInput() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser.');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      document.getElementById("micBtn").classList.add("recording");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      document.getElementById("messageInput").value = transcript;
+      updateCharCount(document.getElementById("messageInput"));
+      sendMessage();
+    };
+
+    recognition.onend = () => {
+      document.getElementById("micBtn").classList.remove("recording");
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      document.getElementById("micBtn").classList.remove("recording");
+    };
+
+    recognition.start();
+  }
+
+  function speakResponse(text) {
+    if (!ttsEnabled || !synth) return;
+
+    // Cancel any ongoing speech
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 0.8;
+
+    synth.speak(utterance);
+  }
+
+  // Load stats from database on page load
+  async function loadStats() {
+    try {
+      const res = await fetch("/database/conversations");
+      const conversations = await res.json();
+
+      if (Array.isArray(conversations) && conversations.length > 0) {
+        // Calculate total messages
+        const totalMessages = conversations.length;
+
+        // Calculate sentiment counts
+        const sentimentCounts = {};
+        conversations.forEach(conv => {
+          const sent = conv.sentiment;
+          if (sent) sentimentCounts[sent] = (sentimentCounts[sent] || 0) + 1;
+        });
+
+        // Most common sentiment
+        let mostCommonSentiment = "—";
+        if (Object.keys(sentimentCounts).length > 0) {
+          mostCommonSentiment = Object.entries(sentimentCounts).sort((a,b) => b[1] - a[1])[0][0];
+        }
+
+        // Average confidence
+        const confidences = [];
+        conversations.forEach(conv => {
+          if (typeof conv.intent_confidence === "number") confidences.push(conv.intent_confidence);
+          if (typeof conv.sentiment_confidence === "number") confidences.push(conv.sentiment_confidence);
+        });
+        const avgConfidence = confidences.length > 0
+          ? (confidences.reduce((a,b) => a+b, 0) / confidences.length * 100).toFixed(1) + "%"
+          : "—";
+
+        // Intent counts
+        const intentCounts = {};
+        conversations.forEach(conv => {
+          const intent = conv.intent ? conv.intent.toLowerCase() : "default";
+          intentCounts[intent] = (intentCounts[intent] || 0) + 1;
+        });
+
+        // Update sidebar
+        document.getElementById("msgCount").textContent = totalMessages;
+        document.getElementById("avgSentiment").textContent = mostCommonSentiment;
+        document.getElementById("avgConfidence").textContent = avgConfidence;
+
+        // Update analytics panel
+        ["order","return","refund","shipping","payment","default"].forEach(k => {
+          const el = document.getElementById("ic-"+k);
+          if (el) el.textContent = intentCounts[k] || 0;
+        });
+
+        // Also load intent counts from localStorage if available
+        if (stats.intentCounts) {
+          document.getElementById('ic-order').textContent = stats.intentCounts.order || 0;
+          document.getElementById('ic-return').textContent = stats.intentCounts.return || 0;
+          document.getElementById('ic-refund').textContent = stats.intentCounts.refund || 0;
+          document.getElementById('ic-shipping').textContent = stats.intentCounts.shipping || 0;
+          document.getElementById('ic-payment').textContent = stats.intentCounts.payment || 0;
+          document.getElementById('ic-default').textContent = stats.intentCounts.default || 0;
+        }
+
+        // Update sentiment bars
+        const total = Object.values(sentimentCounts).reduce((a,b)=>a+b,0) || 1;
+        ["pos","neu","neg"].forEach((k,i) => {
+          const key = ["positive","neutral","negative"][i];
+          const count = sentimentCounts[key] || 0;
+          document.getElementById(k+"Bar").style.width = (count/total*100)+"%";
+          document.getElementById(k+"Count").textContent = count;
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load stats:", err);
+    }
+  }
+
+  // Restore intent counts from localStorage on page load
+  if (stats.intentCounts) {
+    document.getElementById('ic-order').textContent = stats.intentCounts.order || 0;
+    document.getElementById('ic-return').textContent = stats.intentCounts.return || 0;
+    document.getElementById('ic-refund').textContent = stats.intentCounts.refund || 0;
+    document.getElementById('ic-shipping').textContent = stats.intentCounts.shipping || 0;
+    document.getElementById('ic-payment').textContent = stats.intentCounts.payment || 0;
+    document.getElementById('ic-default').textContent = stats.intentCounts.default || 0;
+  }
+
+  // Load stats on page load
+  loadStats();
+
+  // Load model results
+  fetch("/results").then(r=>r.json()).then(data => {
+    if (Array.isArray(data)) {
+      const dt = data.find(m => m.name && m.name.includes("Decision"));
+      if (dt) {
+        const acc = (dt.accuracy*100).toFixed(1)+"%";
+        document.getElementById("dtAcc").textContent = acc;
+        document.getElementById("dtBar").style.width = (dt.accuracy*100)+"%";
+      }
+    }
+  }).catch(()=>{});
+</script>
+</body>
+</html>
